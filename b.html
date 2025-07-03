@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Groom & Go - 完全版アプリプロトタイプ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f4c3a 0%, #2d5a4f 50%, #1a3d32 100%);
+            color: #333;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+            padding-bottom: 70px; /* For bottom navigation */
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2d5a4f 0%, #0f4c3a 100%);
+            padding: 60px 20px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tagline {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            position: relative;
+            z-index: 2;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 3;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e9ecef;
+            flex-shrink: 0;
+            justify-content: center;
+            overflow-x: auto; /* Allow scrolling for many tabs */
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+
+        .nav-tab {
+            flex-shrink: 0; /* Prevent tabs from shrinking */
+            padding: 15px 10px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            min-width: 80px; /* Minimum width for each tab */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+
+        .nav-tab.active {
+            color: #2d5a4f;
+            border-bottom-color: #2d5a4f;
+            background: rgba(45, 90, 79, 0.05);
+        }
+
+        .content {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            max-width: 800px; /* Limit content width for larger screens */
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .service-card {
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(45, 90, 79, 0.1);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2d5a4f 0%, #4a7c59 100%);
+        }
+
+        .service-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #2d5a4f 0%, #4a7c59 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .service-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d5a4f;
+            margin-bottom: 10px;
+        }
+
+        .service-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .book-btn, .primary-btn, .secondary-btn {
+            background: linear-gradient(135deg, #2d5a4f 0%, #4a7c59 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(45, 90, 79, 0.3);
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .secondary-btn {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .book-btn:hover, .primary-btn:hover, .secondary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 90, 79, 0.4);
+        }
+
+        .ai-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .ai-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .ai-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .ai-desc {
+            font-size: 14px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d5a4f;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Points Section */
+        .points-section {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); /* Gold/Orange gradient */
+            color: #8B4513; /* SaddleBrown */
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(255, 165, 0, 0.3);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .points-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(255, 165, 0, 0.4);
+        }
+
+        .points-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .points-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: #8B4513; /* SaddleBrown */
+            margin-bottom: 10px;
+        }
+
+        .points-cta {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #2d5a4f;
+            margin-bottom: 8px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #2d5a4f;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .time-slot {
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .time-slot:hover, .time-slot.selected {
+            border-color: #2d5a4f;
+            background: rgba(45, 90, 79, 0.1);
+            color: #2d5a4f;
+            font-weight: 600;
+        }
+
+        .service-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .service-option {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .service-option:hover, .service-option.selected {
+            border-color: #2d5a4f;
+            background: rgba(45, 90, 79, 0.05);
+        }
+
+        .option-title {
+            font-weight: 600;
+            color: #2d5a4f;
+            margin-bottom: 5px;
+        }
+
+        .option-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #e74c3c;
+            float: right;
+        }
+
+        .option-desc {
+            font-size: 14px;
+            color: #666;
+            clear: both;
+        }
+
+        .golf-courses {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .golf-course {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            border: 1px solid #e9ecef; /* Default border */
+        }
+
+        .golf-course:hover {
+            transform: translateY(-3px);
+        }
+
+        .golf-course.selected {
+            border: 3px solid #2d5a4f;
+        }
+
+        .course-name {
+            font-weight: 700;
+            color: #2d5a4f;
+            margin-bottom: 5px;
+        }
+
+        .course-location {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .course-availability {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #28a745;
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .ai-diagnosis-container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .upload-area {
+            border: 3px dashed #2d5a4f;
+            border-radius: 20px;
+            padding: 40px 20px;
+            margin: 30px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            background: rgba(45, 90, 79, 0.05);
+            border-color: #4a7c59;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #2d5a4f;
+            margin-bottom: 15px;
+        }
+
+        .diagnosis-result {
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-score {
+            font-size: 48px;
+            font-weight: 700;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+
+        .result-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d5a4f;
+            margin-bottom: 15px;
+        }
+
+        .recommendations {
+            text-align: left;
+        }
+
+        .recommendation-item {
+            background: rgba(45, 90, 79, 0.05);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid #2d5a4f;
+        }
+
+        /* Reward Store specific styles */
+        .reward-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+        }
+
+        .reward-item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            margin-right: 15px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .reward-item-details {
+            flex-grow: 1;
+        }
+
+        .reward-item-title {
+            font-weight: 700;
+            color: #2d5a4f;
+            margin-bottom: 5px;
+        }
+
+        .reward-item-desc {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .reward-item-points {
+            font-size: 16px;
+            font-weight: 700;
+            color: #FFA500; /* Orange for points */
+        }
+
+        .exchange-btn {
+            background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%);
+            color: #8B4513;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(255, 165, 0, 0.2);
+            margin-left: auto; /* Push button to the right */
+        }
+
+        .exchange-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            padding: 15px 0;
+            flex-shrink: 0;
+            justify-content: space-around;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            color: #666;
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: #2d5a4f;
+        }
+
+        .confirmation-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .confirmation-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d5a4f;
+            margin-bottom: 15px;
+        }
+
+        .booking-details {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            font-weight: 700;
+            color: #2d5a4f;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(45, 90, 79, 0.3);
+            border-radius: 50%;
+            border-top-color: #2d5a4f;
+            animation: spin 1s ease-in-out infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Adjustments */
+        @media (min-width: 768px) {
+            .header {
+                padding: 80px 40px 40px;
+            }
+
+            .logo {
+                font-size: 36px;
+            }
+
+            .tagline {
+                font-size: 16px;
+            }
+
+            .back-btn {
+                top: 30px;
+                left: 30px;
+                padding: 12px;
+                font-size: 24px;
+            }
+
+            .nav-tabs {
+                border-radius: 0;
+                justify-content: flex-start; /* Align tabs to start on larger screens */
+            }
+
+            .nav-tab {
+                padding: 20px 15px;
+                font-size: 14px;
+                flex: none; /* Do not flex on desktop */
+                min-width: unset; /* Remove min-width restriction */
+            }
+
+            .content {
+                padding: 30px;
+            }
+
+            .service-card {
+                padding: 30px;
+            }
+
+            .service-title {
+                font-size: 22px;
+            }
+
+            .service-desc {
+                font-size: 16px;
+            }
+
+            .book-btn, .primary-btn, .secondary-btn {
+                padding: 15px 30px;
+                font-size: 16px;
+            }
+
+            .ai-title {
+                font-size: 24px;
+            }
+
+            .ai-desc {
+                font-size: 16px;
+            }
+
+            .stats-container {
+                padding: 30px;
+            }
+
+            .stat-number {
+                font-size: 32px;
+            }
+
+            .stat-label {
+                font-size: 14px;
+            }
+
+            .form-input, .form-select, .form-textarea {
+                padding: 18px;
+                font-size: 18px;
+            }
+
+            .time-slots {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            }
+
+            .time-slot {
+                padding: 15px;
+                font-size: 16px;
+            }
+
+            .service-options {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+
+            .option-title {
+                font-size: 20px;
+            }
+
+            .option-price {
+                font-size: 22px;
+            }
+
+            .option-desc {
+                font-size: 16px;
+            }
+
+            .golf-courses {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+
+            .bottom-nav {
+                display: none; /* Hide bottom nav on desktop, use top nav */
+            }
+
+            body {
+                padding-bottom: 0; /* No space needed for bottom nav */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-tabs">
+        <div class="nav-tab active" data-screen="home">ホーム</div>
+        <div class="nav-tab" data-screen="booking">出張予約</div>
+        <div class="nav-tab" data-screen="golf">ゴルフ場</div>
+        <div class="nav-tab" data-screen="ai">AI診断</div>
+        <div class="nav-tab" data-screen="community">コミュニティ</div>
+        <div class="nav-tab" data-screen="profile">プロフィール</div>
+    </div>
+
+    <div class="screen active" id="home-screen">
+        <div class="header">
+            <div class="logo">Groom & Go</div>
+            <div class="tagline">ゴルフを愛する大人の男性のための統合型グルーミングアプリ</div>
+        </div>
+
+        <div class="content">
+            <div class="points-section" onclick="showScreen('rewards-store-screen')">
+                <div class="points-title">あなたの現在のポイント</div>
+                <div class="points-value" id="current-points">2,450pt</div>
+                <div class="points-cta">ポイントを美容用品と交換！ →</div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">✂️</div>
+                <div class="service-title">出張メンズグルーミング</div>
+                <div class="service-desc">プロの理容師があなたの自宅やオフィスに出張。ヘアカット、シェービング、ヘッドスパまで。</div>
+                <button class="book-btn" onclick="showScreen('booking-screen')">今すぐ予約</button>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">🏌️</div>
+                <div class="service-title">ゴルフ場リフレッシュブース</div>
+                <div class="service-desc">提携ゴルフ場での10分完結クールダウン＆リフレッシュサービス。プレー前後に最適。</div>
+                <button class="book-btn" onclick="showScreen('golf-screen')">ブース予約</button>
+            </div>
+
+            <div class="ai-section" onclick="showScreen('ai-screen')">
+                <div class="ai-title">🤖 AIパーソナルケア診断</div>
+                <div class="ai-desc">写真一枚で肌状態を分析し、あなたに最適なケアプランを提案します</div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-item">
+                    <div class="stat-number">2,340</div>
+                    <div class="stat-label">利用者数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">98%</div>
+                    <div class="stat-label">満足度</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">150+</div>
+                    <div class="stat-label">提携ゴルフ場</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" data-screen="home">🏠</div>
+            <div class="nav-item" data-screen="booking">📅</div>
+            <div class="nav-item" data-screen="community">💬</div>
+            <div class="nav-item" data-screen="profile">👤</div>
+        </div>
+    </div>
+
+    <div class="screen" id="booking-screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('home-screen')">←</button>
+            <div class="logo">出張グルーミング予約</div>
+            <div class="tagline">あなたのご都合に合わせてプロがお伺いします</div>
+        </div>
+
+        <div class="content">
+            <div class="service-options">
+                <div class="service-option" data-price="8000" data-points="80" onclick="selectService(this)">
+                    <div class="option-title">ベーシックカット</div>
+                    <div class="option-price">¥8,000</div>
+                    <div class="option-desc">ヘアカット + シャンプー（45分）</div>
+                </div>
+                <div class="service-option" data-price="15000" data-points="150" onclick="selectService(this)">
+                    <div class="option-title">プレミアムケア</div>
+                    <div class="option-price">¥15,000</div>
+                    <div class="option-desc">ヘアカット + シェービング + ヘッドスパ（90分）</div>
+                </div>
+                <div class="service-option" data-price="25000" data-points="250" onclick="selectService(this)">
+                    <div class="option-title">エグゼクティブパッケージ</div>
+                    <div class="option-price">¥25,000</div>
+                    <div class="option-desc">フルサービス + フェイシャル + 眉カット（120分）</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">希望日時</label>
+                <input type="date" class="form-input" min="2025-07-04">
+            </div>
+
+            <div class="time-slots">
+                <div class="time-slot" onclick="selectTime(this)">9:00</div>
+                <div class="time-slot" onclick="selectTime(this)">11:00</div>
+                <div class="time-slot" onclick="selectTime(this)">13:00</div>
+                <div class="time-slot" onclick="selectTime(this)">15:00</div>
+                <div class="time-slot" onclick="selectTime(this)">17:00</div>
+                <div class="time-slot" onclick="selectTime(this)">19:00</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">サービス場所</label>
+                <select class="form-select">
+                    <option>自宅</option>
+                    <option>オフィス</option>
+                    <option>その他</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">住所</label>
+                <input type="text" class="form-input" placeholder="東京都渋谷区...">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">特別なご要望</label>
+                <textarea class="form-textarea" placeholder="アレルギーや特別なご要望がございましたらお書きください"></textarea>
+            </div>
+
+            <button class="primary-btn" onclick="showScreen('booking-confirmation')">予約を確認</button>
+        </div>
+    </div>
+
+    <div class="screen" id="golf-screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('home-screen')">←</button>
+            <div class="logo">ゴルフ場リフレッシュブース</div>
+            <div class="tagline">提携ゴルフ場でのクールダウンサービス</div>
+        </div>
+
+        <div class="content">
+            <div class="golf-courses">
+                <div class="golf-course" data-points="50" onclick="selectGolfCourse(this)">
+                    <div class="course-name">東京ベイゴルフクラブ</div>
+                    <div class="course-location">千葉県千葉市美浜区</div>
+                    <div class="course-availability">空き有り</div>
+                </div>
+                <div class="golf-course" data-points="50" onclick="selectGolfCourse(this)">
+                    <div class="course-name">湘南カントリークラブ</div>
+                    <div class="course-location">神奈川県藤沢市</div>
+                    <div class="course-availability">空き有り</div>
+                </div>
+                <div class="golf-course" data-points="50" onclick="selectGolfCourse(this)">
+                    <div class="course-name">武蔵野グリーンヒルズ</div>
+                    <div class="course-location">埼玉県入間市</div>
+                    <div class="course-availability">残り2枠</div>
+                </div>
+            </div>
+
+            <div class="service-card" style="margin-top: 30px;">
+                <div class="service-title">リフレッシュブースサービス</div>
+                <div class="service-desc">
+                    • 冷却ミストシャワー<br>
+                    • 疲労回復マッサージチェア<br>
+                    • UV アフターケア<br>
+                    • 軽食・ドリンク
+                </div>
+                <div style="font-size: 20px; font-weight: 700; color: #e74c3c; margin: 15px 0;">
+                    ¥3,500 / 15分
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">利用希望時間</label>
+                <div class="time-slots">
+                    <div class="time-slot" onclick="selectTime(this)">プレー前</div>
+                    <div class="time-slot" onclick="selectTime(this)">ハーフターン</div>
+                    <div class="time-slot" onclick="selectTime(this)">プレー後</div>
+                </div>
+            </div>
+
+            <button class="primary-btn" onclick="showScreen('golf-confirmation')">ブース予約を確認</button>
+        </div>
+    </div>
+
+    <div class="screen" id="ai-screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('home-screen')">←</button>
+            <div class="logo">AI パーソナルケア診断</div>
+            <div class="tagline">最新のAI技術で肌状態を分析</div>
+        </div>
+
+        <div class="content">
+            <div class="ai-diagnosis-container">
+                <div class="upload-area" onclick="startDiagnosis()">
+                    <div class="upload-icon">📸</div>
+                    <h3>顔写真をアップロード</h3>
+                    <p>正面からの写真を撮影またはアップロードしてください</p>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-title">AI診断でわかること</div>
+                    <div class="service-desc">
+                        • 肌の水分量・油分バランス<br>
+                        • シワ・たるみの進行度<br>
+                        • 毛穴の状態<br>
+                        • 最適なケア方法の提案<br>
+                        • おすすめ製品の紹介
+                    </div>
+                </div>
+
+                <button class="primary-btn" onclick="startDiagnosis()">診断を開始</button>
+                <button class="secondary-btn" onclick="showDiagnosisResult()">過去の診断結果を見る</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="screen" id="ai-result-screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('ai-screen')">←</button>
+            <div class="logo">診断結果</div>
+            <div class="tagline">あなたの肌状態とケア提案</div>
+        </div>
+
+        <div class="content">
+            <div class="diagnosis-result">
+                <div class="result-score">85</div>
+                <div class="result-title">肌年齢: 実年齢より3歳若い</div>
+                <div class="service-desc">総合的に良好な状態です。継続的なケアで更なる改善が期待できます。</div>
+            </div>
+
+            <div class="recommendations">
+                <h3 style="color: #2d5a4f; margin-bottom: 15px;">推奨ケアプラン</h3>
+                <div class="recommendation-item">
+                    <strong>保湿ケア強化</strong><br>
+                    乾燥が気になる部分に重点的な保湿を
+                </div>
+                <div class="recommendation-item">
+                    <strong>UV対策</strong><br>
+                    ゴルフ時の紫外線対策を徹底しましょう
+                </div>
+                <div class="recommendation-item">
+                    <strong>週1回のスペシャルケア</strong><br>
+                    ヘッドスパ付きのグルーミングがおすすめ
+                </div>
+            </div>
+
+            <button class="primary-btn" onclick="showScreen('booking-screen')">推奨サービスを予約</button>
+            <button class="secondary-btn" onclick="showScreen('ai-screen')">再診断する</button>
+        </div>
+    </div>
+
+    <div class="screen" id="booking-confirmation">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('booking-screen')">←</button>
+            <div class="logo">予約確認</div>
+            <div class="tagline">内容をご確認の上、予約を確定してください</div>
+        </div>
+
+        <div class="content">
+            <div class="booking-details">
+                <div class="detail-row">
+                    <span>サービス</span>
+                    <span id="confirm-service-name">プレミアムケア</span>
+                </div>
+                <div class="detail-row">
+                    <span>日時</span>
+                    <span id="confirm-booking-datetime">2025年7月5日 15:00</span>
+                </div>
+                <div class="detail-row">
+                    <span>場所</span>
+                    <span id="confirm-location">自宅</span>
+                </div>
+                <div class="detail-row">
+                    <span>所要時間</span>
+                    <span id="confirm-duration">90分</span>
+                </div>
+                <div class="detail-row">
+                    <span>料金</span>
+                    <span id="confirm-price">¥15,000</span>
+                </div>
+                <div class="detail-row">
+                    <span>獲得予定ポイント</span>
+                    <span id="confirm-points-to-earn">150pt</span>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-title">キャンセルポリシー</div>
+                <div class="service-desc">
+                    • 24時間前まで: 無料<br>
+                    • 12時間前まで: 50%<br>
+                    • 当日キャンセル: 100%
+                </div>
+            </div>
+
+            <button class="primary-btn" onclick="confirmBooking()">予約を確定する</button>
+            <button class="secondary-btn" onclick="showScreen('booking-screen')">内容を修正</button>
+        </div>
+    </div>
+
+    <div class="screen" id="golf-confirmation">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('golf-screen')">←</button>
+            <div class="logo">ブース予約確認</div>
+            <div class="tagline">リフレッシュブースのご予約内容</div>
+        </div>
+
+        <div class="content">
+            <div class="booking-details">
+                <div class="detail-row">
+                    <span>ゴルフ場</span>
+                    <span id="confirm-golf-course">東京ベイゴルフクラブ</span>
+                </div>
+                <div class="detail-row">
+                    <span>利用時間</span>
+                    <span id="confirm-golf-time">プレー後</span>
+                </div>
+                <div class="detail-row">
+                    <span>サービス時間</span>
+                    <span>15分</span>
+                </div>
+                <div class="detail-row">
+                    <span>料金</span>
+                    <span>¥3,500</span>
+                </div>
+                <div class="detail-row">
+                    <span>獲得予定ポイント</span>
+                    <span id="confirm-golf-points-to-earn">50pt</span>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-title">ブース設備</div>
+                <div class="service-desc">
+                    • 冷却ミストシャワー<br>
+                    • マッサージチェア<br>
+                    • UVアフターケア用品<br>
+                    • 冷たいタオル・ドリンク
+                </div>
+            </div>
+
+            <button class="primary-btn" onclick="confirmGolfBooking()">ブース予約を確定</button>
+            <button class="secondary-btn" onclick="showScreen('golf-screen')">内容を修正</button>
+        </div>
+    </div>
+
+    <div class="screen" id="booking-success">
+        <div class="header">
+            <div class="logo">予約完了</div>
+            <div class="tagline">ありがとうございます</div>
+        </div>
+
+        <div class="content">
+            <div class="confirmation-screen">
+                <div class="success-icon">✅</div>
+                <div class="confirmation-title">予約が確定しました</div>
+                <p>担当スタイリストから24時間以内にご連絡いたします。</p>
+
+                <div class="booking-details">
+                    <div class="detail-row">
+                        <span>予約番号</span>
+                        <span>#GG-2025-0001</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>サービス</span>
+                        <span id="success-service-name">プレミアムケア</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>日時</span>
+                        <span id="success-booking-datetime">2025年7月5日 15:00</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>獲得ポイント</span>
+                        <span id="success-earned-points">150pt</span>
+                    </div>
+                </div>
+
+                <button class="primary-btn" onclick="showScreen('home-screen')">ホームに戻る</button>
+                <button class="secondary-btn" onclick="showScreen('profile-screen')">プロフィールを見る</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="screen" id="community-screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('home-screen')">←</button>
+            <div class="logo">コミュニティ</div>
+            <div class="tagline">ゴルフ＆美容フォーラム</div>
+        </div>
+
+        <div class="content">
+            <div class="service-card">
+                <div class="service-icon">💬</div>
+                <div class="service-title">最新トピック</div>
+                <div class="service-desc">
+                    <strong>夏のゴルフでの日焼け対策について</strong><br>
+                    投稿者: ゴルフ大好き田中さん<br>
+                    返信: 12件 | いいね: 45件
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">⭐</div>
+                <div class="service-title">サービス体験談</div>
+                <div class="service-desc">
+                    <strong>出張グルーミング利用レビュー</strong><br>
+                    投稿者: 東京在住Aさん<br>
+                    ★★★★★ とても満足でした！
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">🏆</div>
+                <div class="service-title">今月のベストケア</div>
+                <div class="service-desc">
+                    メンバーの皆様から選ばれた<br>
+                    おすすめケア方法をご紹介
+                </div>
+            </div>
+
+            <button class="primary-btn" onclick="alert('新しい投稿画面に移動します')">新規投稿</button>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item" data-screen="home">🏠</div>
+            <div class="nav-item" data-screen="booking">📅</div>
+            <div class="nav-item active" data-screen="community">💬</div>
+            <div class="nav-item" data-screen="profile">👤</div>
+        </div>
+    </div>
+
+    <div class="screen" id="profile-screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('home-screen')">←</button>
+            <div class="logo">マイプロフィール</div>
+            <div class="tagline">田中 太郎さん</div>
+        </div>
+
+        <div class="content">
+            <div class="service-card">
+                <div class="service-title">アカウント情報</div>
+                <div class="service-desc">
+                    会員ランク: プレミアム<br>
+                    利用回数: 15回<br>
+                    ポイント: <span id="profile-current-points">2,450</span>pt
+                </div>
+                <button class="secondary-btn" onclick="showScreen('point-history-screen')">ポイント履歴を見る</button>
+            </div>
+
+            <div class="service-card">
+                <div class="service-title">最近の予約</div>
+                <div class="service-desc">
+                    7月5日 プレミアムケア（確定）<br>
+                    6月28日 ベーシックカット（完了）<br>
+                    6月15日 ゴルフ場ブース（完了）
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-title">お気に入りスタイリスト</div>
+                <div class="service-desc">
+                    山田 花子さん ★★★★★<br>
+                    佐藤 次郎さん ★★★★☆
+                </div>
+            </div>
+
+            <button class="primary-btn" onclick="showScreen('rewards-store-screen')">リワードストアへ</button>
+            <button class="secondary-btn" onclick="alert('設定画面に移動します')">設定</button>
+            <button class="secondary-btn" onclick="alert('お気に入り管理画面に移動します')">お気に入り管理</button>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item" data-screen="home">🏠</div>
+            <div class="nav-item" data-screen="booking">📅</div>
+            <div class="nav-item" data-screen="community">💬</div>
+            <div class="nav-item active" data-screen="profile">👤</div>
+        </div>
+    </div>
+
+    <div class="screen" id="rewards-store-screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('home-screen')">←</button>
+            <div class="logo">リワードストア</div>
+            <div class="tagline">ポイントで美容用品をゲット！</div>
+        </div>
+
+        <div class="content">
+            <div class="service-card">
+                <div class="service-title">現在のポイント</div>
+                <div class="service-desc" style="font-size: 24px; font-weight: 700; color: #FFA500;" id="rewards-current-points">2,450pt</div>
+            </div>
+
+            <h3 style="color: #2d5a4f; margin-bottom: 15px;">おすすめ美容用品</h3>
+
+            <div class="reward-item">
+                <img src="https://via.placeholder.com/80x80?text=Face+Lotion" alt="フェイスローション" class="reward-item-image">
+                <div class="reward-item-details">
+                    <div class="reward-item-title">高保湿フェイスローション</div>
+                    <div class="reward-item-desc">ゴルフ後の乾燥対策に。べたつかないサラッとした使い心地。</div>
+                    <div class="reward-item-points">500pt</div>
+                </div>
+                <button class="exchange-btn" data-points-cost="500" data-reward-name="高保湿フェイスローション" onclick="exchangeReward(this)">交換する</button>
+            </div>
+
+            <div class="reward-item">
+                <img src="https://via.placeholder.com/80x80?text=Hair+Wax" alt="ヘアワックス" class="reward-item-image">
+                <div class="reward-item-details">
+                    <div class="reward-item-title">オーガニックヘアワックス</div>
+                    <div class="reward-item-desc">自然なセット力とツヤ。ゴルフ中でもスタイルキープ。</div>
+                    <div class="reward-item-points">300pt</div>
+                </div>
+                <button class="exchange-btn" data-points-cost="300" data-reward-name="オーガニックヘアワックス" onclick="exchangeReward(this)">交換する</button>
+            </div>
+
+            <div class="reward-item">
+                <img src="https://via.placeholder.com/80x80?text=Sun+Cream" alt="日焼け止め" class="reward-item-image">
+                <div class="reward-item-details">
+                    <div class="reward-item-title">強力UVカット日焼け止め</div>
+                    <div class="reward-item-desc">SPF50+ PA++++。ゴルフプレー時の紫外線から肌を守る。</div>
+                    <div class="reward-item-points">750pt</div>
+                </div>
+                <button class="exchange-btn" data-points-cost="750" data-reward-name="強力UVカット日焼け止め" onclick="exchangeReward(this)">交換する</button>
+            </div>
+
+            <div class="reward-item">
+                <img src="https://via.placeholder.com/80x80?text=Massage+Oil" alt="マッサージオイル" class="reward-item-image">
+                <div class="reward-item-details">
+                    <div class="reward-item-title">疲労回復マッサージオイル</div>
+                    <div class="reward-item-desc">ゴルフ後の筋肉の疲れを癒やすアロマオイル。</div>
+                    <div class="reward-item-points">600pt</div>
+                </div>
+                <button class="exchange-btn" data-points-cost="600" data-reward-name="疲労回復マッサージオイル" onclick="exchangeReward(this)">交換する</button>
+            </div>
+            
+            <button class="secondary-btn" onclick="alert('新しい商品をもっと見る画面に移動します')">もっと見る</button>
+        </div>
+    </div>
+
+    <div class="screen" id="point-history-screen">
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('profile-screen')">←</button>
+            <div class="logo">ポイント履歴</div>
+            <div class="tagline">あなたのポイント獲得・利用履歴</div>
+        </div>
+
+        <div class="content">
+            <div class="service-card">
+                <div class="service-title">現在のポイント</div>
+                <div class="service-desc" style="font-size: 24px; font-weight: 700; color: #FFA500;" id="history-current-points">2,450pt</div>
+            </div>
+
+            <h3 style="color: #2d5a4f; margin-bottom: 15px;">履歴</h3>
+
+            <div class="booking-details">
+                <div class="detail-row">
+                    <span>2025/07/03</span>
+                    <span>プレミアムケア利用</span>
+                    <span style="color: #28a745;">+150pt</span>
+                </div>
+                <div class="detail-row">
+                    <span>2025/06/28</span>
+                    <span>東京ベイGC利用</span>
+                    <span style="color: #28a745;">+50pt</span>
+                </div>
+                <div class="detail-row">
+                    <span>2025/06/20</span>
+                    <span>オーガニックヘアワックス交換</span>
+                    <span style="color: #e74c3c;">-300pt</span>
+                </div>
+                <div class="detail-row">
+                    <span>2025/06/15</span>
+                    <span>ベーシックカット利用</span>
+                    <span style="color: #28a745;">+80pt</span>
+                </div>
+                <div class="detail-row">
+                    <span>2025/06/01</span>
+                    <span>新規登録ボーナス</span>
+                    <span style="color: #28a745;">+100pt</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="screen" id="loading-screen">
+        <div class="header">
+            <div class="logo">AI診断中</div>
+            <div class="tagline">肌状態を分析しています...</div>
+        </div>
+
+        <div class="content">
+            <div style="text-align: center; padding: 100px 20px;">
+                <div class="loading-spinner"></div>
+                <h3 style="margin: 30px 0; color: #2d5a4f;">分析中...</h3>
+                <p>最新のAI技術であなたの肌を詳細に分析しています。<br>しばらくお待ちください。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentScreen = 'home-screen';
+        let selectedService = null;
+        let selectedTime = null;
+        let selectedGolfCourse = null;
+        let userPoints = 2450; // ユーザーの初期ポイントをシミュレーション
+
+        // 画面切り替え関数
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            document.getElementById(screenId).classList.add('active');
+            currentScreen = screenId;
+
+            updateNavTabs(screenId);
+            updateBottomNav(screenId); // Update bottom nav visibility and active state
+            updatePointsDisplay(); // ポイント表示を更新
+        }
+
+        // ポイント表示の更新
+        function updatePointsDisplay() {
+            document.getElementById('current-points').textContent = userPoints + 'pt';
+            if (document.getElementById('profile-current-points')) {
+                document.getElementById('profile-current-points').textContent = userPoints;
+            }
+            if (document.getElementById('rewards-current-points')) {
+                document.getElementById('rewards-current-points').textContent = userPoints + 'pt';
+            }
+            if (document.getElementById('history-current-points')) {
+                document.getElementById('history-current-points').textContent = userPoints + 'pt';
+            }
+        }
+
+        // ナビゲーションタブの更新 (上部ナビゲーション)
+        function updateNavTabs(screenId) {
+            document.querySelectorAll('.nav-tabs .nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            let tabMap = {
+                'home-screen': 'home',
+                'booking-screen': 'booking',
+                'golf-screen': 'golf',
+                'ai-screen': 'ai',
+                'community-screen': 'community', 
+                'profile-screen': 'profile',
+                'rewards-store-screen': 'profile', // リワードストアはプロフィールタブに紐付け
+                'point-history-screen': 'profile' // ポイント履歴はプロフィールタブに紐付け
+            };
+
+            let targetTab = tabMap[screenId];
+            if (targetTab) {
+                document.querySelector(`.nav-tabs [data-screen="${targetTab}"]`)?.classList.add('active');
+            }
+        }
+
+        // ボトムナビゲーションの更新
+        function updateBottomNav(screenId) {
+            const bottomNav = document.querySelector('.bottom-nav');
+            const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+
+            // Show bottom nav only for main navigation screens on mobile
+            // 画面幅が768px以上の場合、ボトムナビを非表示にする
+            if (window.innerWidth >= 768) {
+                bottomNav.style.display = 'none';
+                return;
+            }
+
+            const mainScreens = ['home-screen', 'booking-screen', 'community-screen', 'profile-screen'];
+            if (mainScreens.includes(screenId)) {
+                bottomNav.style.display = 'flex';
+                navItems.forEach(item => item.classList.remove('active'));
+                
+                // Set active state for bottom nav items
+                if (screenId === 'home-screen') document.querySelector('.bottom-nav [data-screen="home"]').classList.add('active');
+                else if (screenId === 'booking-screen') document.querySelector('.bottom-nav [data-screen="booking"]').classList.add('active');
+                else if (screenId === 'community-screen') document.querySelector('.bottom-nav [data-screen="community"]').classList.add('active');
+                else if (screenId === 'profile-screen') document.querySelector('.bottom-nav [data-screen="profile"]').classList.add('active');
+
+            } else {
+                bottomNav.style.display = 'none';
+            }
+        }
+
+        // サービス選択
+        function selectService(element) {
+            document.querySelectorAll('.service-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            selectedService = element;
+
+            // 予約確認画面の情報を更新
+            document.getElementById('confirm-service-name').textContent = selectedService.querySelector('.option-title').textContent;
+            document.getElementById('confirm-price').textContent = selectedService.querySelector('.option-price').textContent;
+            document.getElementById('confirm-duration').textContent = selectedService.querySelector('.option-desc').textContent.match(/\((.*?)\)/)[1];
+            document.getElementById('confirm-points-to-earn').textContent = selectedService.dataset.points + 'pt';
+        }
+
+        // 時間選択
+        function selectTime(element) {
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            selectedTime = element.textContent;
+
+            // 予約確認画面の日時を更新 (日付は仮で固定)
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            document.getElementById('confirm-booking-datetime').textContent = `${year}年${month}月${day}日 ${selectedTime}`;
+            document.getElementById('success-booking-datetime').textContent = `${year}年${month}月${day}日 ${selectedTime}`;
+        }
+
+        // ゴルフ場選択
+        function selectGolfCourse(element) {
+            document.querySelectorAll('.golf-course').forEach(course => {
+                course.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            selectedGolfCourse = element;
+
+            // ゴルフ場予約確認画面の情報を更新
+            document.getElementById('confirm-golf-course').textContent = selectedGolfCourse.querySelector('.course-name').textContent;
+            document.getElementById('confirm-golf-points-to-earn').textContent = selectedGolfCourse.dataset.points + 'pt';
+        }
+
+        // 予約確定
+        function confirmBooking() {
+            if (!selectedService || !selectedTime) {
+                alert('サービスと時間を選択してください。');
+                return;
+            }
+
+            // ポイント獲得のシミュレーション
+            const pointsEarned = parseInt(selectedService.dataset.points);
+            userPoints += pointsEarned;
+            document.getElementById('success-earned-points').textContent = pointsEarned + 'pt';
+            document.getElementById('success-service-name').textContent = selectedService.querySelector('.option-title').textContent;
+
+            setTimeout(() => {
+                showScreen('booking-success');
+            }, 1000);
+        }
+
+        // ゴルフ場予約確定
+        function confirmGolfBooking() {
+            if (!selectedGolfCourse || !selectedTime) {
+                alert('ゴルフ場と利用時間を選択してください。');
+                return;
+            }
+
+            // ポイント獲得のシミュレーション
+            const pointsEarned = parseInt(selectedGolfCourse.dataset.points);
+            userPoints += pointsEarned;
+            document.getElementById('success-earned-points').textContent = pointsEarned + 'pt';
+            document.getElementById('success-service-name').textContent = selectedGolfCourse.querySelector('.course-name').textContent + ' リフレッシュブース';
+
+
+            setTimeout(() => {
+                showScreen('booking-success');
+            }, 1000);
+        }
+
+        // AI診断開始
+        function startDiagnosis() {
+            showScreen('loading-screen');
+            
+            setTimeout(() => {
+                showScreen('ai-result-screen');
+            }, 3000);
+        }
+
+        // 診断結果表示
+        function showDiagnosisResult() {
+            showScreen('ai-result-screen');
+        }
+
+        // リワード交換
+        function exchangeReward(buttonElement) {
+            const pointsCost = parseInt(buttonElement.dataset.pointsCost);
+            const rewardName = buttonElement.dataset.rewardName;
+
+            if (userPoints >= pointsCost) {
+                if (confirm(`${rewardName} を ${pointsCost}pt で交換しますか？`)) {
+                    userPoints -= pointsCost;
+                    alert(`${rewardName} を交換しました！\n残高: ${userPoints}pt`);
+                    updatePointsDisplay(); // ポイント表示を更新
+                    // ここで交換履歴に追加するロジック（今回は省略）
+                }
+            } else {
+                alert('ポイントが不足しています。');
+            }
+        }
+
+        // タブクリックイベント (上部ナビゲーション)
+        document.querySelectorAll('.nav-tabs .nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                let screenMap = {
+                    'home': 'home-screen',
+                    'booking': 'booking-screen',
+                    'golf': 'golf-screen',
+                    'ai': 'ai-screen',
+                    'community': 'community-screen', 
+                    'profile': 'profile-screen'
+                };
+                
+                let targetScreen = screenMap[this.dataset.screen];
+                if (targetScreen) {
+                    showScreen(targetScreen);
+                }
+            });
+        });
+
+        // ボトムナビゲーションクリックイベント
+        document.querySelectorAll('.bottom-nav .nav-item').forEach((item) => {
+            item.addEventListener('click', function() {
+                let targetScreen;
+                if (this.dataset.screen === 'home') targetScreen = 'home-screen';
+                else if (this.dataset.screen === 'booking') targetScreen = 'booking-screen';
+                else if (this.dataset.screen === 'community') targetScreen = 'community-screen';
+                else if (this.dataset.screen === 'profile') targetScreen = 'profile-screen';
+
+                if (targetScreen) {
+                    showScreen(targetScreen);
+                }
+            });
+        });
+
+        // カードのアニメーション効果
+        document.querySelectorAll('.service-card, .reward-item').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // ボタンクリック効果
+        document.querySelectorAll('.book-btn, .primary-btn, .secondary-btn, .exchange-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            showScreen('home-screen');
+            updatePointsDisplay(); // 初期ポイントを表示に反映
+        });
+
+        // ウィンドウのリサイズ時にボトムナビの表示を更新
+        window.addEventListener('resize', updateBottomNav);
+    </script>
+</body>
+</html>
